@@ -26,19 +26,19 @@ const gameBoard = (() => {
         }
       }
 
-    // Gets position of markers on game board
-    function getPositions(marker){
-        // Initializes arrays to store marker positions
+    // Gets position of symbols on game board
+    function getPositions(symbol){
+        // Initializes arrays to store symbol positions
         let positions = []
 
         // Iterates through 'board' array to find 'X' or 'O'
         for (let i = 0; i < board.length; i++) {
             for (let j = 0; j < board[i].length; j++){
     
-                if (board[i][j] == 'X' && marker == 'X'){
+                if (board[i][j] == 'X' && symbol == 'X'){
                     positions.push([i,j]);
 
-                } else if (board[i][j] == 'O' && marker == 'O'){
+                } else if (board[i][j] == 'O' && symbol == 'O'){
                     positions.push([i,j]);
                 }
             }
@@ -48,9 +48,9 @@ const gameBoard = (() => {
     }
 
     // Checks for 3-in-a-row on the board
-    function checkForWinner(marker) {
-        // Grabs the positions of a given marker ('X' or 'O')
-        const positions = getPositions(marker);
+    function checkForWinner(symbol) {
+        // Grabs the positions of a given symbol ('X' or 'O')
+        const positions = getPositions(symbol);
 
         for (let i = 0; i < winningCombinations.length; i++){
             // Grabs a  3-coordination winning combination to compare to
@@ -61,11 +61,14 @@ const gameBoard = (() => {
             positions.some(([r, c]) => r ===  row && c === col)
             );
 
+            // Return true as soon as winning combination is found
             if (isWinningCombination === true){
-                console.log(marker + ' wins!')
                 return true;
             }
         }
+
+        // If no winning combination is found, return false
+        return false;
     }
     
 
@@ -94,61 +97,90 @@ const players = (() => {
         }
     ];
 
-    // Switches player turn
-    let currentPlayerTurn = players[0];
-
-    function switchPlayerTurn(){
+    function switchPlayerTurn(currentPlayerTurn){
         if (currentPlayerTurn == players[0]){
             // Switches turn to Player 2
-            currentPlayerTurn = players[1];
+            return players[1];
 
         } else if (currentPlayerTurn == players[1]){
             // Switches turn to Player 2
-            currentPlayerTurn = players[0];
+            return players[0];
 
         }
     }
 
-    function getCurrentPlayerTurn(){
-        return currentPlayerTurn;
-    }
-
     // Return
-    return {switchPlayerTurn, getCurrentPlayerTurn}
+    return {switchPlayerTurn, players};
 
 })();
 
 // Player Actions module
 const playerActions = (() => {
     const { board } = gameBoard;
-    const {switchPlayerTurn, getCurrentPlayerTurn } = players;
 
-    function placeSymbol(row, column) {
-        if (board[row][column] == ''){
-            board[row][column] = getCurrentPlayerTurn().symbol;
-            switchPlayerTurn();
-        } else {
-            console.log("Oops! That spot is occupied. Place somewhere else.")
-        }
-
+    function placeSymbol(row, column, currentPlayerTurn) {
+        board[row][column] = currentPlayerTurn.symbol;
     }
+
     return {placeSymbol}
 
 })();
 
 // Game flow module
 const gameFlow = (() => {
-    const { board } = gameBoard;
-    const { getCurrentPlayerTurn } = players;
- 
-    console.table(board);
-    console.log(getCurrentPlayerTurn().name + "'s turn.")
+    const { board, checkForWinner } = gameBoard;
+    const { switchPlayerTurn, players:allPlayers } = players;
+    const { placeSymbol } = playerActions;
+
+    function startGame() {
+        let hasWon = false;
+        let moveCount = 0;
+        let currentPlayerTurn = allPlayers[0];
+
+        while (hasWon == false && moveCount < 9) {
+            // Display the current board state
+            console.table(board);
+
+            // Get current player's turn
+            console.log(`${currentPlayerTurn.name}'s turn (${currentPlayerTurn.symbol})`);
+          
+            // Prompt the user to place their symbol
+            let row = parseInt(prompt("Enter row (0, 1, or 2):"));
+            let column = parseInt(prompt("Enter column (0, 1, or 2):"));
+
+            // Asks user to place at a different spot if spot is occupied
+            while (board[row][column] !== ''){
+                console.log("That spot is already occupied! Try again.")
+                row = parseInt(prompt("Enter row (0, 1, or 2):"));
+                column = parseInt(prompt("Enter column (0, 1, or 2):"));
+            }
+
+            // Places symbol on board
+            placeSymbol(row, column, currentPlayerTurn);
+
+            // Check if the current player has won
+            hasWon = checkForWinner(currentPlayerTurn.symbol);
+
+            if (hasWon == false) {
+                currentPlayerTurn = switchPlayerTurn(currentPlayerTurn);
+                moveCount += 1;
+            }
+        }
+        // Outputs final board
+        console.table(board);
+
+        // Outputs winner
+        if (hasWon == true){
+            console.log(currentPlayerTurn.name + " is the winner!");
+            
+        // Outputs drawn game
+        } else {
+            console.log("It was a draw!");
+        }
+    }
+
+    return { startGame };
 })();
 
-playerActions.placeSymbol(0,0)
-playerActions.placeSymbol(1,0)
-playerActions.placeSymbol(1,1)
-playerActions.placeSymbol(0,2)
-playerActions.placeSymbol(2,2)
-console.table(gameBoard.board)
-
+// Start the game
+gameFlow.startGame();
