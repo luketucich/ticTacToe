@@ -124,15 +124,63 @@ body{
 .startContainer{
     display: flex;
     flex-direction: column;
+    gap: 1rem;
+    margin-top: 2rem;
 }
 
-.namesContainer{
+.inputContainer{
     display: flex;
+    gap: 1rem;
 }
-.playerNameInput{
+
+.nameInputField{
     display: flex;
     flex-direction: column;
     align-items: center;
+    font-size: 1.5rem;
+}
+
+#playerOneLabel{
+    color: var(--primary);
+    font-weight: 900;
+}
+
+#playerTwoLabel{
+    color: var(--secondary);
+    font-weight: 900;
+}
+
+#player1{
+    color: var(--primary);
+    font-weight: 900;
+}
+
+#player2{
+    color: var(--secondary);
+    font-weight: 900;
+}
+
+input{
+    border-radius: 1rem;
+    border: none;
+    font-size: 1rem;
+    text-align: center;
+    padding: 0.5rem 1rem 0.5rem 1rem;
+    outline: none;
+}
+
+#startGame{
+    border: none;
+    border-radius: 1rem;
+    padding: 1rem;
+    background: linear-gradient(45deg, var(--primary), var(--secondary));
+    color: white;
+    font-size: 1.3rem;
+    font-weight: 900;
+}
+
+#startGame:hover{
+    cursor: grab;
 }
 
 .turn{
