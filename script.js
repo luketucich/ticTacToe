@@ -119,6 +119,11 @@ const gameEndModalStyling = (() => {
         playAgainButton.style.cssText = "";
     }
 
+    playAgainButton.addEventListener('click', () => {
+        resetModal();
+        gameController.resetGame();
+    });
+
     return { showWinModal, showDrawModal, resetModal };
 })();
 
@@ -190,5 +195,48 @@ const gameController = (() => {
         }
     };
 
+    const resetGame = () => {
+        // Reset the board
+        for (let i = 0; i < gameBoard.rows; i++) {
+            for (let j = 0; j < gameBoard.columns; j++) {
+                board[i][j] = "";
+            }
+        }
+
+        // Reset the variables
+        currentPlayerTurn = allPlayers[0];
+        moveCount = 0;
+        hasWon = false;
+
+        // Update the screen and turn display
+        playerTurnDiv.textContent = `${currentPlayerTurn.name}'s Turn`;
+        updateScreen();       
+    }
+
     updateScreen();
+
+    return { resetGame };
+})();
+
+const startGame = (() => {
+    const startGameForm = document.querySelector('.startContainer');
+    const gameContainer = document.querySelector('.container');
+    const playerTurnDiv = document.querySelector('.turn');
+    const { players: allPlayers } = players;
+    
+    // When pressing start game:
+    startGameForm.addEventListener('submit', function(event) {
+        // Prevent the form from submitting normally
+        event.preventDefault();
+
+        // Sets Player Names
+        allPlayers[0].name = document.getElementById('player1').value;
+        allPlayers[1].name = document.getElementById('player2').value;
+        playerTurnDiv.textContent = `${allPlayers[0].name}'s Turn`;
+
+        // Hide the start game section
+        startGameForm.style.display = 'none';
+        gameContainer.style.display = 'flex';
+
+    });
 })();
