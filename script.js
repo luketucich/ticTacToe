@@ -1,3 +1,5 @@
+let addMarkerSound = new Audio('sounds/addMarker.mp3');
+
 // Game board module
 const gameBoard = (() => {
     // Initializes game board size and information
@@ -5,113 +7,71 @@ const gameBoard = (() => {
     const rows = 3;
     const columns = 3;
     const winningCombinations = [
-    // Horizontal combinations
-    [[0,0],[0,1],[0,2]],
-    [[1,0],[1,1],[1,2]],
-    [[2,0],[2,1],[2,2]],
-    // Vertical combinations
-    [[0,0],[1,0],[2,0]],
-    [[0,1],[1,1],[2,1]],
-    [[0,2],[1,2],[2,2]],
-    // Diagonal combinations
-    [[0,0],[1,1],[2,2]],
-    [[0,2],[1,1],[2,0]]
-    ]
+        // Horizontal combinations
+        [[0,0],[0,1],[0,2]],
+        [[1,0],[1,1],[1,2]],
+        [[2,0],[2,1],[2,2]],
+        // Vertical combinations
+        [[0,0],[1,0],[2,0]],
+        [[0,1],[1,1],[2,1]],
+        [[0,2],[1,2],[2,2]],
+        // Diagonal combinations
+        [[0,0],[1,1],[2,2]],
+        [[0,2],[1,1],[2,0]]
+    ];
 
     // Creates a 2D Array of the game board
     for (let i = 0; i < rows; i++) {
         board[i] = [];
         for (let j = 0; j < columns; j++) {
-          board[i].push("");
+            board[i].push("");
         }
-      }
+    }
 
-    // Gets position of symbols on game board
-    function getPositions(symbol){
-        // Initializes arrays to store symbol positions
-        let positions = []
-
-        // Iterates through 'board' array to find 'X' or 'O'
+    // Gets position of symbols on the game board
+    function getPositions(symbol) {
+        let positions = [];
         for (let i = 0; i < board.length; i++) {
-            for (let j = 0; j < board[i].length; j++){
-    
-                if (board[i][j] == 'X' && symbol == 'X'){
-                    positions.push([i,j]);
-
-                } else if (board[i][j] == 'O' && symbol == 'O'){
-                    positions.push([i,j]);
+            for (let j = 0; j < board[i].length; j++) {
+                if (board[i][j] === symbol) {
+                    positions.push([i, j]);
                 }
             }
         }
-
         return positions;
     }
 
     // Checks for 3-in-a-row on the board
     function checkForWinner(symbol) {
-        // Grabs the positions of a given symbol ('X' or 'O')
         const positions = getPositions(symbol);
-
-        for (let i = 0; i < winningCombinations.length; i++){
-            // Grabs a  3-coordination winning combination to compare to
+        for (let i = 0; i < winningCombinations.length; i++) {
             const combination = winningCombinations[i];
-
-            // Check if all positions in the combination are present in the positions array
             const isWinningCombination = combination.every(([row, col]) =>
-            positions.some(([r, c]) => r ===  row && c === col)
+                positions.some(([r, c]) => r === row && c === col)
             );
-
-            // Return true as soon as winning combination is found
-            if (isWinningCombination === true){
-                return true;
-            }
+            if (isWinningCombination) return true;
         }
-
-        // If no winning combination is found, return false
         return false;
     }
-    
 
-    return {board, getPositions, winningCombinations, checkForWinner};
+    return { board, getPositions, checkForWinner, rows, columns };
 })();
-
 
 // Players module
 const players = (() => {
-
-    // Assigns player name
     const playerOneName = "Player One";
     const playerTwoName = "Player Two";
 
-    // Creates player objects
     const players = [
-        {
-            name: playerOneName,
-            symbol: "X",
-            score: 0
-        },
-        {
-            name: playerTwoName,
-            symbol: "O",
-            score: 0
-        }
+        { name: playerOneName, symbol: "X", score: 0 },
+        { name: playerTwoName, symbol: "O", score: 0 }
     ];
 
-    function switchPlayerTurn(currentPlayerTurn){
-        if (currentPlayerTurn == players[0]){
-            // Switches turn to Player 2
-            return players[1];
-
-        } else if (currentPlayerTurn == players[1]){
-            // Switches turn to Player 2
-            return players[0];
-
-        }
+    function switchPlayerTurn(currentPlayerTurn) {
+        return currentPlayerTurn === players[0] ? players[1] : players[0];
     }
 
-    // Return
-    return {switchPlayerTurn, players};
-
+    return { switchPlayerTurn, players };
 })();
 
 // Player Actions module
@@ -119,68 +79,116 @@ const playerActions = (() => {
     const { board } = gameBoard;
 
     function placeSymbol(row, column, currentPlayerTurn) {
+        addMarkerSound.play();
         board[row][column] = currentPlayerTurn.symbol;
     }
 
-    return {placeSymbol}
-
+    return { placeSymbol };
 })();
 
-// Game flow module
-const gameFlow = (() => {
-    const { board, checkForWinner } = gameBoard;
-    const { switchPlayerTurn, players:allPlayers } = players;
-    const { placeSymbol } = playerActions;
+// Game End Modal Styling module
+const gameEndModalStyling = (() => {
+    const gameEndModal = document.querySelector('#endModal');
+    const gameAnnouncement = document.querySelector('#gameAnnouncement');
+    const playAgainButton = document.querySelector('#playAgain');
 
-    function startGame() {
-        let hasWon = false;
-        let moveCount = 0;
-        let currentPlayerTurn = allPlayers[0];
+    function showWinModal(currentPlayer) {
+        gameEndModal.style.display = "flex";
+        gameAnnouncement.textContent = currentPlayer.name + " won!";
 
-        while (hasWon == false && moveCount < 9) {
-            // Display the current board state
-            console.table(board);
-
-            // Get current player's turn
-            console.log(`${currentPlayerTurn.name}'s turn (${currentPlayerTurn.symbol})`);
-          
-            // Prompt the user to place their symbol
-            let row = parseInt(prompt("Enter row (0, 1, or 2):"));
-            let column = parseInt(prompt("Enter column (0, 1, or 2):"));
-
-            // Asks user to place at a different spot if spot is occupied
-            while (board[row][column] !== ''){
-                console.log("That spot is already occupied! Try again.")
-                row = parseInt(prompt("Enter row (0, 1, or 2):"));
-                column = parseInt(prompt("Enter column (0, 1, or 2):"));
-            }
-
-            // Places symbol on board
-            placeSymbol(row, column, currentPlayerTurn);
-
-            // Check if the current player has won
-            hasWon = checkForWinner(currentPlayerTurn.symbol);
-
-            if (hasWon == false) {
-                currentPlayerTurn = switchPlayerTurn(currentPlayerTurn);
-                moveCount += 1;
-            }
-        }
-        // Outputs final board
-        console.table(board);
-
-        // Outputs winner
-        if (hasWon == true){
-            console.log(currentPlayerTurn.name + " is the winner!");
-            
-        // Outputs drawn game
+        if (currentPlayer.symbol === 'O') {
+            gameAnnouncement.style.cssText = "-webkit-text-stroke: 0.3rem var(--secondary);";
+            playAgainButton.style.cssText = "color: var(--secondary); border: 0.1rem solid var(--secondary);";
         } else {
-            console.log("It was a draw!");
+            gameAnnouncement.style.cssText = "";
+            playAgainButton.style.cssText = "";
         }
     }
 
-    return { startGame };
+    function showDrawModal() {
+        gameEndModal.style.display = "flex";
+        gameAnnouncement.textContent = "It was a draw!";
+        gameAnnouncement.style.cssText = "";
+        playAgainButton.style.cssText = "";
+    }
+
+    function resetModal() {
+        gameEndModal.style.display = "none";
+        gameAnnouncement.textContent = "";
+        gameAnnouncement.style.cssText = "";
+        playAgainButton.style.cssText = "";
+    }
+
+    return { showWinModal, showDrawModal, resetModal };
 })();
 
-// Start the game
-gameFlow.startGame();
+// Game Controller module
+const gameController = (() => {
+    const { board, checkForWinner } = gameBoard;
+    const { switchPlayerTurn, players: allPlayers } = players;
+    const { placeSymbol } = playerActions;
+    const { showWinModal, showDrawModal } = gameEndModalStyling;
+
+    const playerTurnDiv = document.querySelector('.turn');
+    const boardDiv = document.querySelector('.board');
+
+    let currentPlayerTurn = allPlayers[0];
+    let moveCount = 0;
+    let hasWon = false;
+
+    const updateScreen = () => {
+        boardDiv.textContent = "";
+
+        for (let i = 0; i < board.length; i++) {
+            for (let j = 0; j < board[i].length; j++) {
+                const square = document.createElement('div');
+                square.className = "square";
+                square.textContent = board[i][j];
+
+                if (square.textContent === 'X') {
+                    square.classList.add('playerOne');
+                } else if (square.textContent === 'O') {
+                    square.classList.add('playerTwo');
+                }
+
+                square.dataset.row = i;
+                square.dataset.column = j;
+                square.addEventListener('click', handleSquareClick);
+                boardDiv.appendChild(square);
+            }
+        }
+    };
+
+    const handleSquareClick = (event) => {
+        const row = event.target.dataset.row;
+        const column = event.target.dataset.column;
+
+        if (board[row][column] === '' && !hasWon && moveCount < 9) {
+            placeSymbol(row, column, currentPlayerTurn);
+
+            if (currentPlayerTurn.symbol === 'X') {
+                event.target.style.color = 'purple';
+            }
+
+            hasWon = checkForWinner(currentPlayerTurn.symbol);
+
+            if (!hasWon && moveCount < 9) {
+                currentPlayerTurn = switchPlayerTurn(currentPlayerTurn);
+                playerTurnDiv.textContent = `${currentPlayerTurn.name}'s Turn`;
+                moveCount += 1;
+            }
+
+            if (hasWon) {
+                showWinModal(currentPlayerTurn);
+            } else if (moveCount === 9) {
+                showDrawModal();
+            }
+
+            updateScreen();
+        } else {
+            console.log("That space is occupied!");
+        }
+    };
+
+    updateScreen();
+})();
