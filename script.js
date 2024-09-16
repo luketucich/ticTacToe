@@ -238,6 +238,14 @@ const gameController = (() => {
 
         // Reset the variables
         currentPlayerTurn = allPlayers[0];
+            // Resets player turn
+        playerTurnDiv.textContent = `${currentPlayerTurn.name}'s Turn`;
+            // Adjusts player turn's outline based off player
+        if (currentPlayerTurn.symbol == 'O'){
+            playerTurnDiv.style.cssText = '-webkit-text-stroke: 0.2rem var(--secondary)';
+        } else {
+            playerTurnDiv.style.cssText = '';
+        }
         moveCount = 0;
         hasWon = false;
 
