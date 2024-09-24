@@ -7,12 +7,9 @@ This is a classic Tic-Tac-Toe game, developed with a focus on clean, encapsulate
 <img width="1470" alt="Screenshot 2024-09-16 at 11 37 18 AM" src="https://github.com/user-attachments/assets/662d609e-1090-4ff7-b1ba-de75fd51cf38">
 <img width="1260" alt="Screenshot 2024-09-16 at 11 30 54 AM" src="https://github.com/user-attachments/assets/50650e1f-c847-4f50-ba89-45b97e2c72af">
 
-
 ## Tech Stack
 
 HTML, CSS, JavaScript
-
-
 
 ## The Takeaway
 
@@ -25,7 +22,3 @@ This process showed me how clean and maintainable code can be when it’s proper
 ## Credits
 
 Background CSS code sourced from https://bg.ibelick.com/
-
-
-
-
